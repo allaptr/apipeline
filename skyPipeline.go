@@ -23,7 +23,7 @@ type SkyCertFetcher struct {
 
 func (sf SkyCertFetcher) FetchCert() (X509Certificate, error) {
 	var err error
-	fmt.Println("Access Secret Store and retrieve the Sky certificate")
+	fmt.Println("***Access Secret Store and retrieve the Sky certificate")
 	if err != nil {
 		return "", err
 	}
@@ -56,9 +56,9 @@ type SkyHttpClient struct {
 
 func (shc SkyHttpClient) CreateRequest() ([]byte, error) {
 	var err error
-	fmt.Println("Create GET HTTP request")
-	fmt.Println("Construct mTLS connection, use X509Certificate")
-	fmt.Println("Set mTLS header")
+	fmt.Println("***Create GET HTTP request")
+	fmt.Println("***Construct mTLS connection, use X509Certificate")
+	fmt.Println("***Set mTLS header")
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +69,8 @@ func (shc SkyHttpClient) CreateRequest() ([]byte, error) {
 func (shc SkyHttpClient) ExecuteRequestResponse(request []byte) ([]byte, error) {
 	var err error
 
-	fmt.Println("Send GET HTTP request to Sky DRM Server")
-	fmt.Println("Receive data from Sky DRM Server")
+	fmt.Println("***Send GET HTTP request to Sky DRM Server")
+	fmt.Println("***Receive data from Sky DRM Server")
 	status := 200
 	if !(status == http.StatusOK) {
 		return nil, errors.Errorf("error from DRM server %v", status)
@@ -109,7 +109,7 @@ type SkyCPIXProcessor struct {
 }
 
 func (scp SkyCPIXProcessor) UnarshalDocument() (*CPIXDocument, error) {
-	fmt.Println("Unmarshalling Payload into CPIXDocument")
+	fmt.Println("***Unmarshalling Payload into CPIXDocument")
 	var err error
 	if err != nil {
 		return nil, err
@@ -119,17 +119,17 @@ func (scp SkyCPIXProcessor) UnarshalDocument() (*CPIXDocument, error) {
 }
 
 func (scp SkyCPIXProcessor) ValidateDeliveryKey() bool {
-	fmt.Println("Noop. No delivery key in the document")
+	fmt.Println("***Noop. No delivery key in the document")
 	return true
 }
 
 func (scp SkyCPIXProcessor) DecryptDocumentKey() (DocumentKey, error) {
-	fmt.Println("Noop. No document key in the document")
+	fmt.Println("***Noop. No document key in the document")
 	return "", nil
 }
 
 func (scp SkyCPIXProcessor) DecryptContentKey() (ContentKey, error) {
-	fmt.Println("Content key is in clear, returning it")
+	fmt.Println("***Content key is in clear, returning it")
 	var contentKey ContentKey
 	return contentKey, nil
 }
@@ -141,6 +141,8 @@ func (scp SkyCPIXProcessor) Handle() error {
 		return err
 	}
 	scp.CpixDoc = *doc
+	scp.ValidateDeliveryKey()
+	scp.DecryptDocumentKey()
 	key, err := scp.DecryptContentKey()
 	if err != nil {
 		return err
@@ -166,7 +168,7 @@ func (sho SkyHandOff) PushDownstream() error {
 	var err error
 	sho.KafkaEndpoint = "kafkaEndpoint" // read from a config store
 	sho.KafkaTopic = "Sky"
-	fmt.Println("Put the content key on kafka queue, topic 'Sky'")
+	fmt.Println("***Put the content key on kafka queue, topic 'Sky'")
 	if err != nil {
 		return errors.Wrap(err, "could not push data downstream")
 	}

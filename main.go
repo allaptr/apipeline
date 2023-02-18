@@ -3,26 +3,39 @@ package main
 import (
 	"fmt"
 	"log"
+	"sync"
 )
 
 func main() {
-	var err error
-	fmt.Println("----Running Sky Pipeline----	")
-	pl := NewSkyCPIXPipeline()
-	for pl != nil {
-		err = pl.Handle()
-		if err != nil {
-			log.Fatal(err)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		var err error
+		defer wg.Done()
+		fmt.Println("----Running Sky Pipeline----	")
+		pl := NewSkyCPIXPipeline()
+		for pl != nil {
+			err = pl.Handle()
+			if err != nil {
+				log.Fatal(err)
+			}
+			pl = pl.Next()
 		}
-		pl = pl.Next()
-	}
-	fmt.Println("----Running Fire Pipeline----	")
-	fpl := NewFireCPIXPipeline()
-	for fpl != nil {
-		err = fpl.Handle()
-		if err != nil {
-			log.Fatal(err)
+	}()
+
+	go func() {
+		var err error
+		defer wg.Done()
+		fmt.Println("----Running Fire Pipeline----	")
+		fpl := NewFireCPIXPipeline()
+		for fpl != nil {
+			err = fpl.Handle()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fpl = fpl.Next()
 		}
-		fpl = fpl.Next()
-	}
+	}()
+
+	wg.Wait()
 }
